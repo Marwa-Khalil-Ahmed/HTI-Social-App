@@ -1,0 +1,27 @@
+{
+  "name": "session1",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start:dev": "node --env-file=.env --watch ./dist/index.js",
+    "start:conc": "concurrently \"tsc -w\" \"npm run start:dev\""
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.2",
+    "nanoid": "^5.1.6",
+    "nodemailer": "^7.0.10",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.3",
+    "@types/nodemailer": "^7.0.2"
+  }
+}
