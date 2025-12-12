@@ -1,6 +1,9 @@
 import z from "zod";
-import { confirmEmailSchema, signupSchema } from "./auth.validation";
+import { confirmEmailSchema, loginConfirmationSchema, loginSchema, resendOtpSchema, signupSchema, twoStepVerificationSchema } from "./auth.validation";
 
-export type SignDto = z.infer<typeof signupSchema>;
-
-export type confirmEmailDto = z.infer<typeof confirmEmailSchema>;
+export type signupDTO=z.infer<typeof signupSchema>;
+export type confirmEmailDTO=z.infer<typeof confirmEmailSchema>
+export type resendOtpDTO=z.infer<typeof resendOtpSchema>
+export type loginDTO=z.infer<typeof loginSchema>
+export type twoStepVerificationDTO=z.infer<typeof twoStepVerificationSchema>
+export type loginConfirmationDTO=z.infer<typeof loginConfirmationSchema>

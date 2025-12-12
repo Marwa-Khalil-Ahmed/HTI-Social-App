@@ -9,7 +9,7 @@ class UserRepo extends DBRepo_1.DBRepo {
         super(user_model_1.UserModel);
         this.model = model;
     }
-    findByEmail = async ({ email, projection = {}, options = {}, }) => {
+    findByEmail = async ({ email, projection = {}, options = {} }) => {
         const doc = await this.model.findOne({ email }, projection, options);
         return doc;
     };

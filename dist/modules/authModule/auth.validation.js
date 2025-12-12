@@ -3,35 +3,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.confirmEmailSchema = exports.signupSchema = void 0;
+exports.loginConfirmationSchema = exports.twoStepVerificationSchema = exports.loginSchema = exports.resendOtpSchema = exports.confirmEmailSchema = exports.signupSchema = void 0;
 const zod_1 = __importDefault(require("zod"));
-exports.signupSchema = zod_1.default
-    .object({
+exports.signupSchema = zod_1.default.object({
     email: zod_1.default.email(),
     firstName: zod_1.default.string(),
     lastName: zod_1.default.string(),
-    password: zod_1.default.string(),
-    confirmPassword: zod_1.default.string(),
     age: zod_1.default.number().optional(),
     phone: zod_1.default.string().optional(),
-})
-    .superRefine((args, ctx) => {
-    if (args.confirmPassword != args.password) {
+    password: zod_1.default.string(),
+    confirmPassword: zod_1.default.string()
+}).superRefine((args, ctx) => {
+    if (args.password !== args.confirmPassword) {
         ctx.addIssue({
             code: "custom",
-            path: ["password", "confirmPassword"],
-            message: "password must be equal to confirm password",
+            message: "Password don't match",
+            path: ["password", "confirmPassword"]
         });
     }
-    /*if(!args.email.startsWith("anas")){
-        ctx.addIssue({
-            code:"custom",
-            path:["name"],
-            message:"must start with 'anas"
-        })
-    }*/
 });
 exports.confirmEmailSchema = zod_1.default.object({
     email: zod_1.default.email(),
-    otp: zod_1.default.string().length(6),
+    otp: zod_1.default.string().length(6)
+});
+exports.resendOtpSchema = zod_1.default.object({
+    email: zod_1.default.email()
+});
+exports.loginSchema = zod_1.default.object({
+    email: zod_1.default.email(),
+    password: zod_1.default.string()
+});
+exports.twoStepVerificationSchema = zod_1.default.object({
+    code: zod_1.default.string().length(6)
+});
+exports.loginConfirmationSchema = zod_1.default.object({
+    otp: zod_1.default.string().length(6)
 });

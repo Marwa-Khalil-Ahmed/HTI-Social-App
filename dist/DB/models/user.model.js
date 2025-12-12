@@ -2,42 +2,60 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
 const mongoose_1 = require("mongoose");
+const zod_1 = require("zod");
 const userSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
-        required: true,
+        required: true
     },
     lastName: {
         type: String,
-        required: true,
+        required: true
     },
     email: {
         type: String,
-        required: true,
+        required: true
     },
     password: {
         type: String,
-        required: true,
+        required: true
     },
     age: {
-        type: Number,
+        type: Number
     },
     phone: {
-        type: String,
+        type: String
     },
-    profileImage: String,
-    coverImages: [String],
+    profileImage: {
+        type: String
+    },
+    covserImages: {
+        type: [String]
+    },
     folderId: String,
-    isVerified: {
+    isConfirmed: {
         type: Boolean,
-        default: false,
+        default: false
     },
     changedCredentialsAt: Date,
     emailOtp: {
         otp: String,
-        expiredAt: Date,
+        expiredAt: Date
     },
+    passOtp: {
+        otp: String,
+        expiredAt: Date
+    },
+    twoStepVerification: {
+        enabled: Boolean,
+        otp: zod_1.string,
+        expiredAt: Date
+    },
+    loginConfirmation: {
+        otp: zod_1.string,
+        expiredAt: Date
+    }
 }, {
-    timestamps: true,
+    timestamps: true
 });
-exports.UserModel = mongoose_1.models.users || (0, mongoose_1.model)("users", userSchema);
+exports.UserModel = mongoose_1.models.users || (0, mongoose_1.model)('users', userSchema);
