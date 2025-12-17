@@ -5,90 +5,115 @@ import { HUserDocument } from "./user.types";
 import { successHandler } from "../../utils/successHandler";
 import { FrienddRequestRepo } from "../../DB/repos/friend.request.repo";
 import { UserNotFoundException } from "../../utils/errors/errors.exceptions";
+import { friendRequestModel } from "../../DB/models/friend.request";
 
-export class UserServices{
-    private userModel=new UserRepo
+export class UserServices {
+    private userModel = new UserRepo
 
-    profileImage=async(req:Request,res:Response)=>{
-        const file=req.file as Express.Multer.File
-        const user=res.locals.user as HUserDocument
-        const path=await uploadFile({
+    profileImage = async (req: Request, res: Response) => {
+        const file = req.file as Express.Multer.File
+        const user = res.locals.user as HUserDocument
+        const path = await uploadFile({
             file,
-            path:`${user._id}/profileImage`
+            path: `${user._id}/profileImage`
         })
-        user.profileImage=path as string
-        await user.save( )
-        return successHandler({res,data:path})
+        user.profileImage = path as string
+        await user.save()
+        return successHandler({ res, data: path })
     }
-    private friendRequestModel=new FrienddRequestRepo
-    sendFriendRequest=async(req:Request,res:Response)=>{
-        const {to}=req.body
-        const authUser:HUserDocument=res.locals.user 
-        const from=authUser._id
-        if(to.toString()==from.toString()){
+    private friendRequestModel = new FrienddRequestRepo
+    sendFriendRequest = async (req: Request, res: Response) => {
+        const { to } = req.body
+        const authUser: HUserDocument = res.locals.user
+        const from = authUser._id
+        if (to.toString() == from.toString()) {
             throw new Error("You can't send friend request to yourself")
         }
-        if(!await this.userModel.findById({
-            id:to
-        })){
+        if (!await this.userModel.findById({
+            id: to
+        })) {
             throw new UserNotFoundException()
         }
-        const isFriends= await this.friendRequestModel.findOne({
-           filter:{
-             $or:[
-                {from:from,to:to},
-                {from:to,to:from}
-            ]
-           }
+        const isFriends = await this.friendRequestModel.findOne({
+            filter: {
+                $or: [
+                    { from: from, to: to },
+                    { from: to, to: from }
+                ]
+            }
         })
-        if(isFriends){
+        if (isFriends) {
             throw new Error("Friend request already sent or you are already friends")
         }
-        const friendRequest=await this.friendRequestModel.create({
-            doc:{
+        const friendRequest = await this.friendRequestModel.create({
+            doc: {
                 from,
                 to
             }
         })
-        return successHandler({res,data:friendRequest})
+        return successHandler({ res, data: friendRequest })
     }
 
-    acceptFriendRequest=async(req:Request,res:Response)=>{
-        const authUser:HUserDocument=res.locals.user 
-        const {id}=req.params as {id:string}
-        const friendRequest=await this.friendRequestModel.findOne({
-             filter:{
-                _id:id,
-                to:authUser._id,
-                acceptedAt:{
-                    $exists:false
+    acceptFriendRequest = async (req: Request, res: Response) => {
+        const authUser: HUserDocument = res.locals.user
+        const { id } = req.params as { id: string }
+        const friendRequest = await this.friendRequestModel.findOne({
+            filter: {
+                _id: id,
+                to: authUser._id,
+                acceptedAt: {
+                    $exists: false
                 }
             }
         })
-        if(!friendRequest){
+        if (!friendRequest) {
             throw new Error("Friend request not found")
         }
         await friendRequest.updateOne({
-            acceptedAt:new Date()
+            acceptedAt: new Date()
         })
-       this.userModel.findOneAndUpdate({
-            filter:{
-                _id:friendRequest.to },
-            update:{
-                $addToSet:{
-                    friends:friendRequest.from 
+        this.userModel.findOneAndUpdate({
+            filter: {
+                _id: friendRequest.to
+            },
+            update: {
+                $addToSet: {
+                    friends: friendRequest.from
                 }
             }
         })
         this.userModel.findOneAndUpdate({
-            filter:{
-                _id:friendRequest.from },
-            update:{
-                $addToSet:{
-                    friends:authUser._id 
+            filter: {
+                _id: friendRequest.from
+            },
+            update: {
+                $addToSet: {
+                    friends: authUser._id
                 }
             }
         })
-        return successHandler({res,data:friendRequest})
+        return successHandler({ res, data: friendRequest })
     }
+
+    
+
+    deleteFriendRequest=async(req:Request,res:Response)=>{
+        const {id}=req.params
+        const friendRequest=await friendRequestModel.findById(id)
+        if(!friendRequest){
+            throw new Error("Friend request not found"); 
+        }
+        const user=res.locals.user as HUserDocument
+        if(friendRequest.from.toString()!=user._id.toString() && friendRequest.to.toString()!=user._id.toString()){
+            throw new Error("Can't delete someone else's request");
+        }
+        if(friendRequest.acceptedAt){
+            throw new Error("Friend request accepted");
+        }
+        await friendRequest.deleteOne(friendRequest._id)
+        return successHandler({res})
+    }
+
+    
+
 }
